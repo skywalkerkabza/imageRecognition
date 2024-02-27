@@ -1,30 +1,4 @@
-/**
- * @license
- * Copyright 2018 Google LLC. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================================
- */
-
-/********************************************************************
- * Demo created by Jason Mayes 2020.
- *
- * Got questions? Reach out to me on social:
- * Twitter: @jason_mayes
- * LinkedIn: https://www.linkedin.com/in/creativetech
- ********************************************************************/
-
 const demosSection = document.getElementById('demos');
-
 var model = undefined;
 
 // Before we can use COCO-SSD class we must wait for it to finish
@@ -36,20 +10,11 @@ cocoSsd.load().then(function (loadedModel) {
   demosSection.classList.remove('invisible');
 });
 
-
-/********************************************************************
-// Demo 1: Grab a bunch of images from the page and classify them
-// upon click.
-********************************************************************/
-
-// In this demo, we have put all our clickable images in divs with the 
-// CSS class 'classifyOnClick'. Lets get all the elements that have
-// this class.
 const imageContainers = document.getElementsByClassName('classifyOnClick');
 
 // Now let's go through all of these and add a click event listener.
 for (let i = 0; i < imageContainers.length; i++) {
-  // Add event listener to the child element whichis the img element.
+  // Add event listener to the child element which is the img element.
   imageContainers[i].children[0].addEventListener('click', handleClick);
 }
 
@@ -64,7 +29,7 @@ function handleClick(event) {
   // different image data each time. This returns a promise
   // which we wait to complete and then call a function to
   // print out the results of the prediction.
-  model.detect(event.target).then(function (predictions) {
+  model.detect(event.target).then(function in(predictions) {
     // Lets write the predictions to a new paragraph element and
     // add it to the DOM.
     console.log(predictions);
@@ -94,27 +59,14 @@ function handleClick(event) {
   });
 }
 
-
-
-/********************************************************************
-// Demo 2: Continuously grab image from webcam stream and classify it.
-// Note: You must access the demo on https for this to work:
-// https://tensorflow-js-image-classification.glitch.me/
-********************************************************************/
-
 const video = document.getElementById('webcam');
 const liveView = document.getElementById('liveView');
+let isFrontCamera = false; // Variable to track the current camera state
 
 // Check if webcam access is supported.
 function hasGetUserMedia() {
-  return !!(navigator.mediaDevices &&
-    navigator.mediaDevices.getUserMedia);
+  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 }
-
-// Keep a reference of all the child elements we create
-// so we can remove them easilly on each render.
-var children = [];
-
 
 // If webcam supported, add event listener to button for when user
 // wants to activate it.
@@ -125,11 +77,10 @@ if (hasGetUserMedia()) {
   console.warn('getUserMedia() is not supported by your browser');
 }
 
-
 // Enable the live webcam view and start classification.
 function enableCam(event) {
   if (!model) {
-    console.log('Wait! Model not loaded yet.')
+    console.log('Wait! Model not loaded yet.');
     return;
   }
   
@@ -138,7 +89,7 @@ function enableCam(event) {
   
   // getUsermedia parameters.
   const constraints = {
-    video: true
+    video: { facingMode: (isFrontCamera ? 'environment' : 'user') } // Toggle between 'user' (front) and 'environment' (back) camera
   };
 
   // Activate the webcam stream.
@@ -148,6 +99,26 @@ function enableCam(event) {
   });
 }
 
+// Function to switch between front and back cameras
+function switchCamera() {
+  const constraints = {
+    video: { facingMode: (isFrontCamera ? 'environment' : 'user') } // Toggle between 'user' (front) and 'environment' (back) camera
+  };
+
+  navigator.mediaDevices.getUserMedia(constraints)
+    .then(stream => {
+      video.srcObject = stream;
+    })
+    .catch(error => {
+      console.error('Error accessing media devices.', error);
+    });
+
+  isFrontCamera = !isFrontCamera; // Toggle the camera state
+}
+
+// Add event listener for switching camera button
+const switchCameraButton = document.getElementById('switchCameraButton');
+switchCameraButton.addEventListener('click', switchCamera);
 
 function predictWebcam() {
   // Now let's start classifying the stream.
