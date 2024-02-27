@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', function () {
     const webcamElement = document.getElementById('webcam');
-    const predictionsElement = document.getElementById('predictions');
+    const predictionsTable = document.getElementById('predictions').getElementsByTagName('tbody')[0];
 
     async function setupWebcam() {
         return new Promise((resolve, reject) => {
@@ -34,11 +34,15 @@ document.addEventListener('DOMContentLoaded', function () {
         while (true) {
             const result = await model.classify(webcamElement);
 
-            predictionsElement.innerText = '';
+            predictionsTable.innerHTML = ''; // Clear previous predictions
+
             result.forEach(prediction => {
-                const listItem = document.createElement('li');
-                listItem.innerText = `${prediction.className}: ${prediction.probability.toFixed(4)}`;
-                predictionsElement.appendChild(listItem);
+                const row = predictionsTable.insertRow();
+                const cellClass = row.insertCell(0);
+                const cellProbability = row.insertCell(1);
+
+                cellClass.textContent = prediction.className;
+                cellProbability.textContent = prediction.probability.toFixed(4);
             });
 
             await tf.nextFrame();
